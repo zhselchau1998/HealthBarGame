@@ -54,6 +54,7 @@ public class HealthGameBoard extends JPanel implements Board{
 	private int playerSpeed;	//Speed for movement in px
 	private int playerTile;		//Which world tile player is in
 	private int playerHealth;
+	private int playerMaxHealth;
 	private int playerSize;		//Size of player, square.
 	private Rectangle playerHitBox = new Rectangle();
 	
@@ -91,6 +92,7 @@ public class HealthGameBoard extends JPanel implements Board{
 		playerSpeed = 2;
 		playerTile = 1;
 		playerHealth = 100;
+		playerMaxHealth = 100;
 		playerSize = 20;
 		playerHitBox.setBounds(
 				playerX-(playerSize/2), //Width start
@@ -133,10 +135,22 @@ public class HealthGameBoard extends JPanel implements Board{
 			}
 		}else{//World border collision
 			//System.out.println("Colided with world border");
-			if(outOfBounds.compareTo("UP")==0)playerY += playerSpeed*2;
-			if(outOfBounds.compareTo("DOWN")==0)playerY -= playerSpeed*2;
-			if(outOfBounds.compareTo("RIGHT")==0)playerX -= playerSpeed*2;
-			if(outOfBounds.compareTo("LEFT")==0)playerX += playerSpeed*2;
+			if(outOfBounds.compareTo("UP")==0){
+				playerY += playerSpeed;
+				if(upDir)playerY -= playerSpeed;
+			}
+			if(outOfBounds.compareTo("DOWN")==0){
+				playerY -= playerSpeed;
+				if(downDir)playerY += playerSpeed;
+			}
+			if(outOfBounds.compareTo("RIGHT")==0){
+				playerX -= playerSpeed;
+				if(rightDir)playerX += playerSpeed;
+			}
+			if(outOfBounds.compareTo("LEFT")==0){
+				playerX += playerSpeed;
+				if(leftDir)playerX -= playerSpeed;
+			}
 		}
 		
 		//Need to reset hitbox after movement
@@ -178,12 +192,47 @@ public class HealthGameBoard extends JPanel implements Board{
  	Graphics
 	*/
 	private void drawPlayer(Graphics g){
-		g.setColor(Color.blue);
+		//Player body
+		g.setColor(Color.GREEN);
 		g.fillRect(
 				playerX - playerSize/2, 
 				playerY - playerSize/2, 
 				playerSize, 
 				playerSize);
+		
+		//Player health bar
+		g.setColor(Color.RED);
+		g.fillRect(
+				playerX - playerSize*2/3, 	//Offset by 1/3 player size
+				playerY - playerSize*2/3-5, //Offest by 1/3 player size and 5 px for drawing bar
+				playerSize*4/3, 
+				5);
+		g.setColor(Color.GREEN);
+		g.fillRect(
+				playerX - playerSize*2/3, 	//Offset by 1/3 player size
+				playerY - playerSize*2/3-5, //Offest by 1/3 player size and 5 px for drawing bar
+				playerSize*4/3 * playerHealth/playerMaxHealth, 
+				5);
+		
+		//Player body boarder
+		g.setColor(Color.BLACK);
+		g.drawRect(
+				playerX - playerSize/2, 
+				playerY - playerSize/2, 
+				playerSize, 
+				playerSize);
+		g.drawRect(
+				playerX - playerSize/2+1, 
+				playerY - playerSize/2+1, 
+				playerSize-2, 
+				playerSize-2);
+		
+		//Player health bar boarder
+		g.drawRect(
+				playerX - playerSize*2/3, 	//Offset by 1/3 player size
+				playerY - playerSize*2/3-5, //Offest by 1/3 player size and 5 px for drawing bar
+				playerSize*4/3, 
+				5);
 	}
 	
 	private void drawBackground(Graphics g){
@@ -252,6 +301,7 @@ public class HealthGameBoard extends JPanel implements Board{
 			
 			//Testing
 			if(key == KeyEvent.VK_S) playerSpeed = 5;//Sprinting Mechanic?
+			if(key == KeyEvent.VK_H) playerHealth = playerMaxHealth/2;
 		}
 		
 		
@@ -266,6 +316,7 @@ public class HealthGameBoard extends JPanel implements Board{
 			
 			//Testing
 			if(key == KeyEvent.VK_S) playerSpeed = 2;
+			if(key == KeyEvent.VK_H) playerHealth += playerHealth;
 		}
 	}
 }
