@@ -15,7 +15,6 @@ public class HealthGameBoard extends JPanel implements Board{
 	 * 	Finish off music and SFX
 	 * 	Add Sprites
 	 * 	Enhance Sprinting Mechanic
-	 * 	Create Entity Object
 	 *  Add food
 	 */
 	
@@ -46,7 +45,7 @@ public class HealthGameBoard extends JPanel implements Board{
 	private int dmgRateTicCount;
 	
 	//Game Asthetic
-	private boolean bumpPlayed;
+	private boolean bumpPlayed;	//Has bump sound been played yet
 	private File soundFile;
 	private Clip musicClip;		//Music
 	private Clip onePlayClip;	//Sound effects
@@ -54,14 +53,15 @@ public class HealthGameBoard extends JPanel implements Board{
 	private FontMetrics bigMtr;
 	
 	//Player
-	private int playerX;		//2d so player indexes
-	private int playerY;
-	private int playerSpeed;	//Speed for movement in px
-	private int playerTile;		//Which world tile player is in
-	private int playerHealth;
-	private int playerMaxHealth;
-	private int playerSize;		//Size of player, square.
-	private Rectangle playerHitBox = new Rectangle();
+	Player user = new Player();
+	/*private int user.X;		//2d so player indexes
+	private int user.Y;
+	private int user.speed;	//Speed for movement in px
+	private int user.tile;		//Which world tile player is in
+	private int user.health;
+	private int user.maxHealth;
+	private int user.size;		//Size of player, square.
+	private Rectangle user.hitBox = new Rectangle();*/
 	
 	
 	public HealthGameBoard(){
@@ -96,18 +96,13 @@ public class HealthGameBoard extends JPanel implements Board{
 		musicClip = loopSound("HealthBarGameMusic.wav");
 		
 		//Player
-		playerX = __B_WIDTH/2;
-		playerY = __B_HEIGHT/2;
-		playerSpeed = 2;
-		playerTile = 1;
-		playerHealth = 100;
-		playerMaxHealth = 100;
-		playerSize = 20;
-		playerHitBox.setBounds(
-				playerX-(playerSize/2), //Width start
-				playerY-(playerSize/2), //Height start
-				playerSize, 			//Width length
-				playerSize);			//Height length
+		user.X = __B_WIDTH/2;		//Set in middle fo screen
+		user.Y = __B_HEIGHT/2;
+		user.speed = 2;				//Walking pace
+		user.tile = 1;				//Start at first tile
+		user.health = 100;			//Start at full health
+		user.maxHealth = 100;
+		user.size = 20;				
 		
 		/*Starting the game*/
 		gameTimer.start();
@@ -120,46 +115,46 @@ public class HealthGameBoard extends JPanel implements Board{
 		String outOfBounds = outOfBoundsCheck();
 		
 		if(outOfBounds.compareTo("NONE") == 0){		//Normal movement
-			if(upDir)playerY -= playerSpeed;
-			if(downDir)playerY += playerSpeed;
-			if(rightDir)playerX += playerSpeed;
-			if(leftDir)playerX -= playerSpeed;
+			if(upDir)user.Y -= user.speed;
+			if(downDir)user.Y += user.speed;
+			if(rightDir)user.X += user.speed;
+			if(leftDir)user.X -= user.speed;
 			bumpPlayed = false;						//Allow bump sound again
 		}else if(tileCheck(outOfBounds)){			//Can move to another tile
 			System.out.println("Moved to a new tile toward " + outOfBounds);
 			if(outOfBounds.compareTo("UP")==0){
-				playerY = __B_HEIGHT - playerSize/2 - 1;
-				playerTile -= 2;
+				user.Y = __B_HEIGHT - user.size/2 - 1;
+				user.tile -= 2;
 			}
 			if(outOfBounds.compareTo("DOWN")==0){
-				playerY = playerSize/2 + 1;
-				playerTile +=2;
+				user.Y = user.size/2 + 1;
+				user.tile +=2;
 			}
 			if(outOfBounds.compareTo("RIGHT")==0){
-				playerX = playerSize/2 + 1;
-				playerTile += 1;
+				user.X = user.size/2 + 1;
+				user.tile += 1;
 			}
 			if(outOfBounds.compareTo("LEFT")==0){
-				playerX = __B_WIDTH - playerSize/2 - 1;
-				playerTile -= 1;
+				user.X = __B_WIDTH - user.size/2 - 1;
+				user.tile -= 1;
 			}
 		}else{//World border collision
 			//System.out.println("Colided with world border");
 			if(outOfBounds.compareTo("UP")==0){
-				playerY += playerSpeed;
-				if(upDir)playerY -= playerSpeed;
+				user.Y += user.speed;
+				if(upDir)user.Y -= user.speed;
 			}
 			if(outOfBounds.compareTo("DOWN")==0){
-				playerY -= playerSpeed;
-				if(downDir)playerY += playerSpeed;
+				user.Y -= user.speed;
+				if(downDir)user.Y += user.speed;
 			}
 			if(outOfBounds.compareTo("RIGHT")==0){
-				playerX -= playerSpeed;
-				if(rightDir)playerX += playerSpeed;
+				user.X -= user.speed;
+				if(rightDir)user.X += user.speed;
 			}
 			if(outOfBounds.compareTo("LEFT")==0){
-				playerX += playerSpeed;
-				if(leftDir)playerX -= playerSpeed;
+				user.X += user.speed;
+				if(leftDir)user.X -= user.speed;
 			}
 			if(!bumpPlayed){						//Play bump sound once
 				playSound("CollisionSound.wav");
@@ -168,20 +163,20 @@ public class HealthGameBoard extends JPanel implements Board{
 		}
 		
 		//Need to reset hitbox after movement
-		playerHitBox.setBounds(
-				playerX-(playerSize/2), //Width start
-				playerY-(playerSize/2), //Height start
-				playerSize, 			//Width length
-				playerSize);			//Height length
+		user.hitBox.setBounds(
+				user.X-(user.size/2), //Width start
+				user.Y-(user.size/2), //Height start
+				user.size, 			//Width length
+				user.size);			//Height length
 	}
 	
 	//Checking if player is out of bounds
 	private String outOfBoundsCheck(){
 		
-		if(playerY - playerSize/2 < 0) return "UP";
-		if(playerY + playerSize/2 > __B_HEIGHT) return "DOWN";
-		if(playerX + playerSize/2 > __B_WIDTH) return "RIGHT";
-		if(playerX - playerSize/2 < 0) return "LEFT";
+		if(user.Y - user.size/2 < 0) return "UP";
+		if(user.Y + user.size/2 > __B_HEIGHT) return "DOWN";
+		if(user.X + user.size/2 > __B_WIDTH) return "RIGHT";
+		if(user.X - user.size/2 < 0) return "LEFT";
 		
 		return "NONE";
 	}
@@ -189,13 +184,13 @@ public class HealthGameBoard extends JPanel implements Board{
 	//Checking if player can move to a new tile, directly tied to outOfBoundsCheck
 	private boolean tileCheck(String dir){
 		
-		if(dir.compareTo("UP") == 0 && (playerTile == 3 || playerTile == 4))
+		if(dir.compareTo("UP") == 0 && (user.tile == 3 || user.tile == 4))
 			return true;
-		if(dir.compareTo("DOWN") == 0 && (playerTile == 1 || playerTile == 2))
+		if(dir.compareTo("DOWN") == 0 && (user.tile == 1 || user.tile == 2))
 			return true;
-		if(dir.compareTo("RIGHT") == 0 && (playerTile == 1 || playerTile == 3))
+		if(dir.compareTo("RIGHT") == 0 && (user.tile == 1 || user.tile == 3))
 			return true;
-		if(dir.compareTo("LEFT") == 0 && (playerTile == 2 || playerTile == 4))
+		if(dir.compareTo("LEFT") == 0 && (user.tile == 2 || user.tile == 4))
 			return true;
 		
 		return false;
@@ -205,7 +200,7 @@ public class HealthGameBoard extends JPanel implements Board{
 	private void dmgCalc(){
 		//Survival DOT dmg
 		if(dmgRate == dmgRateTicCount++) {
-			playerHealth--; 
+			user.health--; 
 			dmgRateTicCount=0;
 			}
 
@@ -215,54 +210,15 @@ public class HealthGameBoard extends JPanel implements Board{
 	/**
  	Graphics
 	*/
-	private void drawPlayer(Graphics g){
-		//Player body
-		g.setColor(Color.GREEN);
-		g.fillRect(
-				playerX - playerSize/2, 
-				playerY - playerSize/2, 
-				playerSize, 
-				playerSize);
+	private void drawEntities(Graphics g){
 		
-		//Player health bar
-		g.setColor(Color.RED);
-		g.fillRect(
-				playerX - playerSize*2/3, 	//Offset by 1/3 player size
-				playerY - playerSize*2/3-5, //Offest by 1/3 player size and 5 px for drawing bar
-				playerSize*4/3, 
-				5);
-		g.setColor(Color.GREEN);
-		g.fillRect(
-				playerX - playerSize*2/3, 	//Offset by 1/3 player size
-				playerY - playerSize*2/3-5, //Offest by 1/3 player size and 5 px for drawing bar
-				playerSize*4/3 * playerHealth/playerMaxHealth, 
-				5);
-		
-		//Player body boarder
-		g.setColor(Color.BLACK);
-		g.drawRect(
-				playerX - playerSize/2, 
-				playerY - playerSize/2, 
-				playerSize, 
-				playerSize);
-		g.drawRect(
-				playerX - playerSize/2+1, 
-				playerY - playerSize/2+1, 
-				playerSize-2, 
-				playerSize-2);
-		
-		//Player health bar boarder
-		g.drawRect(
-				playerX - playerSize*2/3, 	//Offset by 1/3 player size
-				playerY - playerSize*2/3-5, //Offest by 1/3 player size and 5 px for drawing bar
-				playerSize*4/3, 
-				5);
+		user.drawPlayer(g);
 	}
 	
 	private void drawBackground(Graphics g){
 		g.setFont(bigFont);
 		g.setColor(Color.WHITE);
-		g.drawString(""+playerTile, (__B_WIDTH - bigMtr.stringWidth(""+playerTile))/2, __B_HEIGHT/2);
+		g.drawString(""+user.tile, (__B_WIDTH - bigMtr.stringWidth(""+user.tile))/2, __B_HEIGHT/2);
 	}
 	
 	private void gameOver(Graphics g){
@@ -285,7 +241,7 @@ public class HealthGameBoard extends JPanel implements Board{
 	private void doDrawing(Graphics g){
 		if(inGame){
 			drawBackground(g);
-			drawPlayer(g);
+			drawEntities(g);
 		} else gameOver(g);
 	}
 	
@@ -347,8 +303,8 @@ public class HealthGameBoard extends JPanel implements Board{
 			if(key == KeyEvent.VK_LEFT) leftDir = true;
 			
 			//Testing
-			if(key == KeyEvent.VK_S) playerSpeed = 5;//Sprinting Mechanic?
-			if(key == KeyEvent.VK_H) playerHealth = playerMaxHealth/2;
+			if(key == KeyEvent.VK_S) user.speed = 5;//Sprinting Mechanic?
+			//if(key == KeyEvent.VK_H) user.health = user.maxHealth/2;
 		}
 		
 		
@@ -362,8 +318,8 @@ public class HealthGameBoard extends JPanel implements Board{
 			if(key == KeyEvent.VK_LEFT) leftDir = false;
 			
 			//Testing
-			if(key == KeyEvent.VK_S) playerSpeed = 2;
-			if(key == KeyEvent.VK_H) playerHealth += playerHealth;
+			if(key == KeyEvent.VK_S) user.speed = 2;
+			//if(key == KeyEvent.VK_H) user.health += user.health;
 			if(key == KeyEvent.VK_M) pauseSound(musicClip);
 		}
 	}
