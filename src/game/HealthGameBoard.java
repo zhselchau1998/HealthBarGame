@@ -207,6 +207,12 @@ public class HealthGameBoard extends JPanel implements Board{
 	}
 	
 	
+	//Checks to see if player is out of health
+	private boolean healthCheck(){
+		if(user.health == 0) return true;
+		else return false;
+	}
+	
 	/**
  	Graphics
 	*/
@@ -222,7 +228,12 @@ public class HealthGameBoard extends JPanel implements Board{
 	}
 	
 	private void gameOver(Graphics g){
-		
+		g.setFont(bigFont);
+		g.setColor(Color.WHITE);
+		g.drawString(
+				"GAME OVER", 
+				(__B_WIDTH-bigMtr.stringWidth("GAME OVER"))/2, 
+				__B_HEIGHT/2);
 	}
 	
 	
@@ -233,6 +244,7 @@ public class HealthGameBoard extends JPanel implements Board{
 		
 		move();
 		dmgCalc();
+		if(healthCheck())inGame=false;
 		
 		repaint();
 	}

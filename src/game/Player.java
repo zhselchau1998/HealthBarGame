@@ -37,7 +37,7 @@ public class Player extends Entity{
 		g.fillRect(
 				X-size*2/3, 
 				Y-size*2/3-5,
-				size*4/3,
+				size*4/3*health/maxHealth,
 				5);
 		
 		//Border
