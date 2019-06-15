@@ -113,13 +113,13 @@ public class HealthGameBoard extends JPanel implements Board{
 		
 		String outOfBounds = outOfBoundsCheck();
 		
-		if(outOfBounds.compareTo("NONE") == 0){//Normal movement
+		if(outOfBounds.compareTo("NONE") == 0){		//Normal movement
 			if(upDir)playerY -= playerSpeed;
 			if(downDir)playerY += playerSpeed;
 			if(rightDir)playerX += playerSpeed;
 			if(leftDir)playerX -= playerSpeed;
-			bumpPlayed = false;
-		}else if(tileCheck(outOfBounds)){//Can move to another tile
+			bumpPlayed = false;						//Allow bump sound again
+		}else if(tileCheck(outOfBounds)){			//Can move to another tile
 			System.out.println("Moved to a new tile toward " + outOfBounds);
 			if(outOfBounds.compareTo("UP")==0){
 				playerY = __B_HEIGHT - playerSize/2 - 1;
@@ -155,7 +155,7 @@ public class HealthGameBoard extends JPanel implements Board{
 				playerX += playerSpeed;
 				if(leftDir)playerX -= playerSpeed;
 			}
-			if(!bumpPlayed){
+			if(!bumpPlayed){						//Play bump sound once
 				playSound("CollisionSound.wav");
 				bumpPlayed = true;
 			}
@@ -295,18 +295,19 @@ public class HealthGameBoard extends JPanel implements Board{
 		
 		try{
 			tmpClip = AudioSystem.getClip();
-			tmpClip.open(AudioSystem.getAudioInputStream(soundFile));
-			tmpClip.start();
-			tmpClip.loop(Clip.LOOP_CONTINUOUSLY);
+			tmpClip.open(AudioSystem.getAudioInputStream(soundFile));	//Setting up sound file
+			tmpClip.start();											//Play clip
+			tmpClip.loop(Clip.LOOP_CONTINUOUSLY);						//Loop clip
 		}catch(Exception e){}
 		return tmpClip;
 	}
 
 	//Pause a sound
 	public void pauseSound(Clip loopedSound) {
-		if(loopedSound.isActive()) loopedSound.stop();
-		else{
-			loopedSound.start();
+		if(loopedSound.isActive()) loopedSound.stop();	//If music is playing then pause
+		else{											//If it isn't playing then unpause
+			loopedSound.start(); 
+			loopedSound.loop(Clip.LOOP_CONTINUOUSLY);
 		}
 	}
 
