@@ -99,10 +99,7 @@ public class HealthGameBoard extends JPanel implements Board{
 		user.X = __B_WIDTH/2;		//Set in middle fo screen
 		user.Y = __B_HEIGHT/2;
 		user.speed = 2;				//Walking pace
-		user.tile = 1;				//Start at first tile
-		user.health = 100;			//Start at full health
-		user.maxHealth = 100;
-		user.size = 20;				
+		
 		
 		/*Starting the game*/
 		gameTimer.start();
@@ -206,19 +203,19 @@ public class HealthGameBoard extends JPanel implements Board{
 
 	}
 	
-	
 	//Checks to see if player is out of health
 	private boolean healthCheck(){
 		if(user.health == 0) return true;
 		else return false;
 	}
 	
+	
 	/**
  	Graphics
 	*/
 	private void drawEntities(Graphics g){
 		
-		user.drawPlayer(g);
+		user.draw(g);
 	}
 	
 	private void drawBackground(Graphics g){
@@ -242,9 +239,11 @@ public class HealthGameBoard extends JPanel implements Board{
 	*///Every tic of the gameTimer
 	public void actionPerformed(ActionEvent e) {
 		
-		move();
-		dmgCalc();
-		if(healthCheck())inGame=false;
+		if(inGame){
+			move();
+			dmgCalc();
+			inGame = !healthCheck();
+		}
 		
 		repaint();
 	}

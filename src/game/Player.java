@@ -7,7 +7,6 @@ import java.awt.Rectangle;
 public class Player extends Entity{
 
 	int speed;
-	int tile;
 	int health;
 	int maxHealth;
 	
@@ -23,8 +22,16 @@ public class Player extends Entity{
 		this.maxHealth = 100;
 	}
 	
-	public void drawPlayer(Graphics g){
-		drawEntity(g);
+	public void draw(Graphics g){
+		
+		//Body
+		g.setColor(shade);
+		g.fillRect(X-size/2,Y-size/2,size,size);
+		
+		//Border
+		g.setColor(Color.BLACK);
+		g.drawRect(X-size/2,Y-size/2,size,size);
+		g.drawRect(X+1-size/2, Y+1-size/2, size-2, size-2);
 		
 		//Health Bar
 		g.setColor(Color.RED);

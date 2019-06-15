@@ -13,6 +13,7 @@ public class Entity {
 	int X;
 	int Y;
 	int size;
+	int tile;
 	Rectangle hitBox;
 	Color shade;
 	
@@ -20,18 +21,21 @@ public class Entity {
 	public Entity(){
 		this.X = 0;
 		this.Y = 0;
-		this.size = 20;
+		this.size = 20;		
+		this.tile = 1;		//X and Y are in the middle of the hitBox
 		this.hitBox = new Rectangle(X-size/2,Y-size/2,size,size);
-		this.shade = Color.GREEN;
+		this.shade = Color.WHITE;
 	}
 	public Entity(int X, int Y){
 		this.X = X;
 		this.Y = Y;
 		this.size = 20;
+		this.tile = 1;
 		this.hitBox = new Rectangle(this.X-size/2,this.Y-size/2,size,size);
+		this.shade = Color.WHITE;
 	}
 	
-	public void drawEntity(Graphics g){
+	public void draw(Graphics g){
 		//Body
 		g.setColor(shade);
 		g.fillRect(X-size/2,Y-size/2,size,size);
