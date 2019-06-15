@@ -3,7 +3,7 @@ package game;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.util.Random;
+//import java.util.Random;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
@@ -11,22 +11,24 @@ import javax.swing.*;
 public class HealthGameBoard extends JPanel implements Board{
 
 	//TODO:
-	/*	Create Healthbar Mechanic
-	 *  Add Obstacles
+	 /* Add Obstacles
 	 * 	Finish off music and SFX
 	 * 	Add Sprites
-	 * 	Create Sprinting Mechanic
+	 * 	Enhance Sprinting Mechanic
 	 * 	Create Entity Object
+	 *  Add food
 	 */
 	
+
+	private static final long serialVersionUID = 1L;
 	/** 
 	CONSTANTS 
 	*/
 	private final int __B_WIDTH = 500;
 	private final int __B_HEIGHT = 500;
 	private final int __DELAY = 20;			
-	private final int __INVEN_SIZE = 9;		
-	private final int __WORLD_SIZE = 4; 	// 1|2
+	//private final int __INVEN_SIZE = 9;		
+	//private final int __WORLD_SIZE = 4; 	// 1|2
 											// 3|4
 	/**
 	VARIABLES
@@ -40,6 +42,8 @@ public class HealthGameBoard extends JPanel implements Board{
 	private boolean downDir;
 	private boolean rightDir;
 	private boolean leftDir;
+	private int dmgRate;		//How many tics between constant dot dmg
+	private int dmgRateTicCount;
 	
 	//Game Asthetic
 	private boolean bumpPlayed;
@@ -82,6 +86,8 @@ public class HealthGameBoard extends JPanel implements Board{
 		
 		//Game Mechanics
 		upDir = downDir = rightDir = leftDir = false;
+		dmgRate = 5;					//Determines how many tics b/w dot dmg
+		dmgRateTicCount = 0;			//Initialize at 0
 		
 		//Game Asthetic
 		bumpPlayed = false;
@@ -195,6 +201,16 @@ public class HealthGameBoard extends JPanel implements Board{
 		return false;
 	}
 	
+	//This is where damage calculation for everything happens every tic
+	private void dmgCalc(){
+		//Survival DOT dmg
+		if(dmgRate == dmgRateTicCount++) {
+			playerHealth--; 
+			dmgRateTicCount=0;
+			}
+
+	}
+	
 	
 	/**
  	Graphics
@@ -249,6 +265,10 @@ public class HealthGameBoard extends JPanel implements Board{
 		g.drawString(""+playerTile, (__B_WIDTH - bigMtr.stringWidth(""+playerTile))/2, __B_HEIGHT/2);
 	}
 	
+	private void gameOver(Graphics g){
+		
+	}
+	
 	
 	/**
 	Game Engine Functions
@@ -256,16 +276,17 @@ public class HealthGameBoard extends JPanel implements Board{
 	public void actionPerformed(ActionEvent e) {
 		
 		move();
+		dmgCalc();
 		
 		repaint();
 	}
 	
-	//This is where all the graphics should occur.
+	//This is where all the graphics logic should occur.
 	private void doDrawing(Graphics g){
 		if(inGame){
 			drawBackground(g);
 			drawPlayer(g);
-		}
+		} else gameOver(g);
 	}
 	
 	//Connection to JPanel

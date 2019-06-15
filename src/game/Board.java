@@ -1,12 +1,7 @@
 package game;
 
-import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
-import java.util.Random;
-
 import javax.sound.sampled.*;
-import javax.swing.*;
 
 public interface Board extends ActionListener{
 

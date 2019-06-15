@@ -5,6 +5,8 @@ import javax.swing.JFrame;
 
 public class HealthGame extends JFrame{
 
+	private static final long serialVersionUID = 7046L;
+
 	public HealthGame(){
 		add(new HealthGameBoard());
 		
