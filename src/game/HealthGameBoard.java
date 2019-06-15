@@ -42,8 +42,9 @@ public class HealthGameBoard extends JPanel implements Board{
 	private boolean leftDir;
 	
 	//Game Asthetic
+	private boolean bumpPlayed;
 	private File soundFile;
-	private Clip loopClip;		//Music
+	private Clip musicClip;		//Music
 	private Clip onePlayClip;	//Sound effects
 	private Font bigFont;
 	private FontMetrics bigMtr;
@@ -83,8 +84,10 @@ public class HealthGameBoard extends JPanel implements Board{
 		upDir = downDir = rightDir = leftDir = false;
 		
 		//Game Asthetic
+		bumpPlayed = false;
 		bigFont = new Font("Helvetica", Font.BOLD, 52);
 		bigMtr = getFontMetrics(bigFont);
+		musicClip = loopSound("HealthBarGameMusic.wav");
 		
 		//Player
 		playerX = __B_WIDTH/2;
@@ -115,6 +118,7 @@ public class HealthGameBoard extends JPanel implements Board{
 			if(downDir)playerY += playerSpeed;
 			if(rightDir)playerX += playerSpeed;
 			if(leftDir)playerX -= playerSpeed;
+			bumpPlayed = false;
 		}else if(tileCheck(outOfBounds)){//Can move to another tile
 			System.out.println("Moved to a new tile toward " + outOfBounds);
 			if(outOfBounds.compareTo("UP")==0){
@@ -150,6 +154,10 @@ public class HealthGameBoard extends JPanel implements Board{
 			if(outOfBounds.compareTo("LEFT")==0){
 				playerX += playerSpeed;
 				if(leftDir)playerX -= playerSpeed;
+			}
+			if(!bumpPlayed){
+				playSound("CollisionSound.wav");
+				bumpPlayed = true;
 			}
 		}
 		
@@ -270,19 +278,36 @@ public class HealthGameBoard extends JPanel implements Board{
 	//SFX
 	public void playSound(String filename) {
 		
+		soundFile = new File(filename);
 		
+		try{
+			onePlayClip = AudioSystem.getClip();
+			onePlayClip.open(AudioSystem.getAudioInputStream(soundFile));
+			onePlayClip.start();
+		}catch(Exception e){}
 	}
 
 	//Music/Loop sounds
 	public Clip loopSound(String filename) {
 		
-		return null;
+		soundFile = new File(filename);
+		Clip tmpClip = null;
+		
+		try{
+			tmpClip = AudioSystem.getClip();
+			tmpClip.open(AudioSystem.getAudioInputStream(soundFile));
+			tmpClip.start();
+			tmpClip.loop(Clip.LOOP_CONTINUOUSLY);
+		}catch(Exception e){}
+		return tmpClip;
 	}
 
 	//Pause a sound
 	public void pauseSound(Clip loopedSound) {
-		
-		
+		if(loopedSound.isActive()) loopedSound.stop();
+		else{
+			loopedSound.start();
+		}
 	}
 
 	/**
@@ -317,6 +342,7 @@ public class HealthGameBoard extends JPanel implements Board{
 			//Testing
 			if(key == KeyEvent.VK_S) playerSpeed = 2;
 			if(key == KeyEvent.VK_H) playerHealth += playerHealth;
+			if(key == KeyEvent.VK_M) pauseSound(musicClip);
 		}
 	}
 }
