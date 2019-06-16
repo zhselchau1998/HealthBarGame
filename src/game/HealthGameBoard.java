@@ -3,7 +3,7 @@ package game;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-//import java.util.Random;
+import java.util.Random;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
@@ -27,14 +27,14 @@ public class HealthGameBoard extends JPanel implements Board{
 	private final int __B_HEIGHT = 500;
 	private final int __DELAY = 20;			
 	//private final int __INVEN_SIZE = 9;		
-	//private final int __WORLD_SIZE = 4; 	// 1|2
+	private final int __WORLD_SIZE = 4; 	// 1|2
 											// 3|4
 	/**
 	VARIABLES
 	*/
 	//Game Structure
 	private boolean inGame;
-	private Timer gameTimer;	//Game clock
+	private Timer gameTimer = new Timer(__DELAY, this);	//Game clock
 	
 	//Game Mechanics
 	private boolean upDir;		//Movement Direction of Player
@@ -53,7 +53,7 @@ public class HealthGameBoard extends JPanel implements Board{
 	private FontMetrics bigMtr;
 	
 	//Player
-	Player user = new Player();
+	Player user;
 	/*private int user.X;		//2d so player indexes
 	private int user.Y;
 	private int user.speed;	//Speed for movement in px
@@ -62,6 +62,10 @@ public class HealthGameBoard extends JPanel implements Board{
 	private int user.maxHealth;
 	private int user.size;		//Size of player, square.
 	private Rectangle user.hitBox = new Rectangle();*/
+	
+	//Food
+	Food food;
+	boolean foodInGame;
 	
 	
 	public HealthGameBoard(){
@@ -82,7 +86,6 @@ public class HealthGameBoard extends JPanel implements Board{
 		/*Variable Setting*/
 		//Game Structure
 		inGame = true;
-		gameTimer = new Timer(__DELAY, this);
 		
 		//Game Mechanics
 		upDir = downDir = rightDir = leftDir = false;
@@ -96,10 +99,11 @@ public class HealthGameBoard extends JPanel implements Board{
 		musicClip = loopSound("HealthBarGameMusic.wav");
 		
 		//Player
-		user.X = __B_WIDTH/2;		//Set in middle fo screen
-		user.Y = __B_HEIGHT/2;
-		user.speed = 2;				//Walking pace
+		user = new Player(__B_WIDTH/2, __B_HEIGHT/2);
 		
+		//Food
+		foodInGame = false;
+		spawnFood();
 		
 		/*Starting the game*/
 		gameTimer.start();
@@ -209,12 +213,37 @@ public class HealthGameBoard extends JPanel implements Board{
 		else return false;
 	}
 	
+	//Spawns a new Food entity at a random location in the world
+	private void spawnFood(){
+		if(!foodInGame){
+			food = new Food(
+					(int) Math.abs(new Random().nextInt(__B_WIDTH)),
+					(int) Math.abs(new Random().nextInt(__B_HEIGHT)),
+					(int) Math.abs(new Random().nextInt(__WORLD_SIZE))+1
+					);
+			foodInGame = true;
+			System.out.println("Food spawned at X: " + food.X + ", Y: " + food.Y + ", and Tile: " + food.tile);
+		}
+	}
+	
+	//Checks if the player is in contact with a food entity
+	private boolean playerFoodCollisionCheck(){
+		
+		if(user.hitBox.intersects(food.hitBox) && user.tile == food.tile){
+			user.health += food.healthRecovered;
+			foodInGame = false;
+			spawnFood();
+		}
+		return false;
+	}
 	
 	/**
  	Graphics
 	*/
 	private void drawEntities(Graphics g){
-		
+		if(user.tile == food.tile){
+			food.draw(g);
+		}
 		user.draw(g);
 	}
 	
@@ -231,6 +260,8 @@ public class HealthGameBoard extends JPanel implements Board{
 				"GAME OVER", 
 				(__B_WIDTH-bigMtr.stringWidth("GAME OVER"))/2, 
 				__B_HEIGHT/2);
+		
+		musicClip.close();		//This is to prevent overlapping music
 	}
 	
 	
@@ -241,6 +272,7 @@ public class HealthGameBoard extends JPanel implements Board{
 		
 		if(inGame){
 			move();
+			playerFoodCollisionCheck();
 			dmgCalc();
 			inGame = !healthCheck();
 		}
@@ -332,6 +364,9 @@ public class HealthGameBoard extends JPanel implements Board{
 			if(key == KeyEvent.VK_S) user.speed = 2;
 			//if(key == KeyEvent.VK_H) user.health += user.health;
 			if(key == KeyEvent.VK_M) pauseSound(musicClip);
+			
+			//Restart Game
+			if(!inGame && key == KeyEvent.VK_ENTER) initGame();
 		}
 	}
 }

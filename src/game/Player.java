@@ -22,6 +22,18 @@ public class Player extends Entity{
 		this.maxHealth = 100;
 	}
 	
+	public Player(int X, int Y){
+		this.X = X;
+		this.Y = Y;
+		this.size = 20;
+		this.hitBox = new Rectangle(this.X-size/2,this.Y-size/2,size,size);
+		this.shade = Color.GREEN;
+		this.speed = 2;
+		this.tile = 1;
+		this.health = 100;
+		this.maxHealth = 100;
+	}
+	
 	public void draw(Graphics g){
 		
 		//Body
