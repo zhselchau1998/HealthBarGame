@@ -9,6 +9,10 @@ public class Player extends Entity{
 	int speed;
 	int health;
 	int maxHealth;
+	int sprint;
+	int sprintRate;
+	int sprintCheck;
+	boolean isSprinting;
 	
 	public Player(){
 		this.X = 0;
@@ -20,6 +24,10 @@ public class Player extends Entity{
 		this.tile = 1;
 		this.health = 100;
 		this.maxHealth = 100;
+		this.sprint = 100;
+		this.sprintRate = 3;
+		this.sprintCheck = 0;
+		this.isSprinting = false;
 	}
 	
 	public Player(int X, int Y){
@@ -32,6 +40,10 @@ public class Player extends Entity{
 		this.tile = 1;
 		this.health = 100;
 		this.maxHealth = 100;
+		this.sprint = 100;
+		this.sprintRate = 3;
+		this.sprintCheck = 0;
+		this.isSprinting = false;
 	}
 	
 	public void draw(Graphics g){
@@ -71,12 +83,40 @@ public class Player extends Entity{
 
 	//Heals the player by the int. If health > maxHealth then reduce health till at maxhealth
 	public boolean healBy(int healthRecovered){
-		this.health += healthRecovered;
+		this.health += healthRecovered;			//Recover health
 		if(this.health > this.maxHealth) {
-			this.health = this.maxHealth;
-			System.out.println("Player healed up to " + this.health + " health");
+			this.health = this.maxHealth;		//Cap health
+			//System.out.println("Player healed up to " + this.health + " health");
 			return true;
 		}
 		return false;
+	}
+
+	//Determine if sprinting and if so, increase speed to 5 and periodically recude sprint
+	public void sprint(){
+		if(this.isSprinting && this.sprint > 0){					//While sprinting
+			this.sprintCheck++;										//Incrememnt sprint check
+			if(this.sprintRate <= this.sprintCheck){
+				this.sprint--;										//Decrement sprint
+				this.sprintCheck = 0;								//Reset sprint counter
+			}
+			this.speed = 4;											//Sprint speed
+		}else{																	//While not sprinting
+			this.sprintCheck++;													//Increment sprint check
+			if(this.sprintRate*5 <= this.sprintCheck && this.sprint < 100){	//if sprint is less than 100
+				this.sprint++;													//Increment sprint
+				this.sprintCheck = 0;											//Reset sptint counter
+			}
+			this.speed = 2;											//Walking speed
+		}
+		
+		if(this.sprint <= 0) this.isSprinting = false;
+	}
+
+	//Toggles the isSprinting variable
+	public boolean toggleSprinting(){
+		if(this.isSprinting) this.isSprinting = false;
+		else this.isSprinting = true;
+		return this.isSprinting;
 	}
 }

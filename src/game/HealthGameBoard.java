@@ -14,6 +14,7 @@ public class HealthGameBoard extends JPanel implements Board{
 	 /* Add Obstacles
 	 * 	Add Sprites
 	 * 	Enhance Sprinting Mechanic
+	 *  Add Gameover SFX
 	 */
 	
 
@@ -49,8 +50,10 @@ public class HealthGameBoard extends JPanel implements Board{
 	private Clip musicClip;		//Music
 	private Clip onePlayClip;	//Sound effects
 	private Font bigFont;
+	private Font medFont;
 	private Font smlFont;
 	private FontMetrics bigMtr;
+	private FontMetrics medMtr;
 	private FontMetrics smlMtr;
 	
 	//Player
@@ -91,14 +94,16 @@ public class HealthGameBoard extends JPanel implements Board{
 		
 		//Game Mechanics
 		upDir = downDir = rightDir = leftDir = false;
-		dmgRate = 20;					//Determines how many tics b/w dot dmg
+		dmgRate = 7;					//Determines how many tics b/w dot dmg
 		dmgRateTicCount = 0;			//Initialize at 0
 		
 		//Game Asthetic
 		bumpPlayed = false;
 		bigFont = new Font("Helvetica", Font.BOLD, 52);
-		smlFont = new Font("Helvetica", Font.BOLD, 24);
+		medFont = new Font("Helvetica", Font.BOLD, 24);
+		smlFont = new Font("Helvetica", Font.BOLD, 10);
 		bigMtr = getFontMetrics(bigFont);
+		medMtr = getFontMetrics(medFont);
 		smlMtr = getFontMetrics(smlFont);
 		musicClip = loopSound("HealthBarGameMusic.wav");
 		
@@ -121,6 +126,8 @@ public class HealthGameBoard extends JPanel implements Board{
 	private void move(){
 		
 		String outOfBounds = outOfBoundsCheck();
+		
+		user.sprint();
 		
 		if(outOfBounds.compareTo("NONE") == 0){		//Normal movement
 			if(upDir)user.Y -= user.speed;
@@ -207,7 +214,7 @@ public class HealthGameBoard extends JPanel implements Board{
 	//This is where damage calculation for everything happens every tic
 	private void dmgCalc(){
 		//Survival DOT dmg
-		if(dmgRate/user.speed <= dmgRateTicCount++) {
+		if(dmgRate <= dmgRateTicCount++) {
 			user.health--; 
 			dmgRateTicCount=0;
 			}
@@ -223,8 +230,8 @@ public class HealthGameBoard extends JPanel implements Board{
 	//Spawns a new Food entity at a random location in the world
 	private void spawnFood(){
 		food = new Food(
-				(int) Math.abs(new Random().nextInt(__B_WIDTH-40)) + 20,
-				(int) Math.abs(new Random().nextInt(__B_HEIGHT-40)) + 20,
+				(int) Math.abs(new Random().nextInt(__B_WIDTH-80)) + 40,
+				(int) Math.abs(new Random().nextInt(__B_HEIGHT-80)) + 40,
 				(int) Math.abs(new Random().nextInt(__WORLD_SIZE))+1
 				);
 		System.out.println("Food spawned at X: " + food.X + ", Y: " + food.Y + ", and Tile: " + food.tile);
@@ -266,15 +273,66 @@ public class HealthGameBoard extends JPanel implements Board{
 				(__B_WIDTH-bigMtr.stringWidth("GAME OVER"))/2, 
 				__B_HEIGHT/2);
 		
+		//Score
+		g.setFont(medFont);
+		g.drawString(
+				"Final Score: "+score, 
+				(__B_WIDTH-medMtr.stringWidth("Final Score: "+score))/2, 
+				__B_HEIGHT*2/3);
+		
 		musicClip.close();		//This is to prevent overlapping music
+	}
+	
+	private void drawOverlay(Graphics g){
+		drawScore(g);
+		drawSprint(g);
+		drawOverlayHealth(g);
+		drawFoodTile(g);
 	}
 	
 	private void drawScore(Graphics g){
 		g.setColor(Color.WHITE);
-		g.setFont(smlFont);
-		g.drawString("Score: " + score, 5, 5+24);
+		g.setFont(medFont);
+		g.drawString("Score: " + score, 5, 5+20);
 	}
 	
+	private void drawSprint(Graphics g){
+		//Sprint Bar
+		g.setColor(Color.DARK_GRAY);
+		g.fillRect(__B_WIDTH - 110, 25, 100, 5);
+		g.setColor(new Color(255, 204, 102));
+		g.fillRect(__B_WIDTH - 110, 25, user.sprint, 5);
+		g.setColor(Color.BLACK);
+		g.drawRect(__B_WIDTH - 110, 25, 100, 5);
+		
+		//Sprint Value
+		g.setColor(Color.BLACK);
+		g.setFont(smlFont);
+		g.drawString(user.sprint + "/100", __B_WIDTH - 110 - smlMtr.stringWidth(user.sprint + "/100"), 31);
+	}
+
+	private void drawOverlayHealth(Graphics g){
+		//Health Bar
+		g.setColor(Color.RED);
+		g.fillRect(__B_WIDTH - 110, 5, 100, 15);
+		g.setColor(Color.GREEN);
+		g.fillRect(__B_WIDTH - 110, 5, user.health, 15);
+		g.setColor(Color.BLACK);
+		g.drawRect(__B_WIDTH - 110, 5, 100, 15);
+		
+		//Health Value
+		g.setColor(Color.BLACK);
+		g.drawString(user.health + "/100", __B_WIDTH - 110 - smlMtr.stringWidth(user.health + "/100"), 16);
+	}
+	
+	private void drawFoodTile(Graphics g){
+		g.setColor(Color.WHITE);
+		g.setFont(medFont);
+		g.drawString(			//This shows the player where the food is
+				"Tile: "+food.tile, 								
+				(__B_HEIGHT-medMtr.stringWidth("Tile: "+food.tile))/2, 
+				35);
+	}
 	
 	/**
 	Game Engine Functions
@@ -296,7 +354,7 @@ public class HealthGameBoard extends JPanel implements Board{
 		if(inGame){
 			drawBackground(g);
 			drawEntities(g);
-			drawScore(g);
+			drawOverlay(g);
 		} else gameOver(g);
 	}
 	
@@ -358,7 +416,7 @@ public class HealthGameBoard extends JPanel implements Board{
 			if(key == KeyEvent.VK_LEFT) leftDir = true;
 			
 			//Testing
-			if(key == KeyEvent.VK_S) user.speed = 4;//Sprinting Mechanic?
+			if(key == KeyEvent.VK_S) user.toggleSprinting();//Sprinting Mechanic?
 			//if(key == KeyEvent.VK_H) user.health = user.maxHealth/2;
 		}
 		
@@ -373,7 +431,7 @@ public class HealthGameBoard extends JPanel implements Board{
 			if(key == KeyEvent.VK_LEFT) leftDir = false;
 			
 			//Testing
-			if(key == KeyEvent.VK_S) user.speed = 2;
+			//if(key == KeyEvent.VK_S) user.isSprinting = false;
 			//if(key == KeyEvent.VK_H) user.health += user.health;
 			if(key == KeyEvent.VK_M) pauseSound(musicClip);
 			
