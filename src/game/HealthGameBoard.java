@@ -12,10 +12,8 @@ public class HealthGameBoard extends JPanel implements Board{
 
 	//TODO:
 	 /* Add Obstacles
-	 * 	Finish off music and SFX
 	 * 	Add Sprites
 	 * 	Enhance Sprinting Mechanic
-	 *  Add food
 	 */
 	
 
@@ -35,6 +33,7 @@ public class HealthGameBoard extends JPanel implements Board{
 	//Game Structure
 	private boolean inGame;
 	private Timer gameTimer = new Timer(__DELAY, this);	//Game clock
+	private int score;
 	
 	//Game Mechanics
 	private boolean upDir;		//Movement Direction of Player
@@ -50,7 +49,9 @@ public class HealthGameBoard extends JPanel implements Board{
 	private Clip musicClip;		//Music
 	private Clip onePlayClip;	//Sound effects
 	private Font bigFont;
+	private Font smlFont;
 	private FontMetrics bigMtr;
+	private FontMetrics smlMtr;
 	
 	//Player
 	Player user;
@@ -65,7 +66,7 @@ public class HealthGameBoard extends JPanel implements Board{
 	
 	//Food
 	Food food;
-	boolean foodInGame;
+
 	
 	
 	public HealthGameBoard(){
@@ -86,24 +87,30 @@ public class HealthGameBoard extends JPanel implements Board{
 		/*Variable Setting*/
 		//Game Structure
 		inGame = true;
+		score = 0;
 		
 		//Game Mechanics
 		upDir = downDir = rightDir = leftDir = false;
-		dmgRate = 5;					//Determines how many tics b/w dot dmg
+		dmgRate = 20;					//Determines how many tics b/w dot dmg
 		dmgRateTicCount = 0;			//Initialize at 0
 		
 		//Game Asthetic
 		bumpPlayed = false;
 		bigFont = new Font("Helvetica", Font.BOLD, 52);
+		smlFont = new Font("Helvetica", Font.BOLD, 24);
 		bigMtr = getFontMetrics(bigFont);
+		smlMtr = getFontMetrics(smlFont);
 		musicClip = loopSound("HealthBarGameMusic.wav");
 		
 		//Player
 		user = new Player(__B_WIDTH/2, __B_HEIGHT/2);
 		
 		//Food
-		foodInGame = false;
 		spawnFood();
+		food.tile = 1;
+		food.X = __B_WIDTH*2/3;
+		food.Y = __B_HEIGHT*2/3;
+		food.setRect();
 		
 		/*Starting the game*/
 		gameTimer.start();
@@ -200,7 +207,7 @@ public class HealthGameBoard extends JPanel implements Board{
 	//This is where damage calculation for everything happens every tic
 	private void dmgCalc(){
 		//Survival DOT dmg
-		if(dmgRate == dmgRateTicCount++) {
+		if(dmgRate/user.speed <= dmgRateTicCount++) {
 			user.health--; 
 			dmgRateTicCount=0;
 			}
@@ -215,24 +222,22 @@ public class HealthGameBoard extends JPanel implements Board{
 	
 	//Spawns a new Food entity at a random location in the world
 	private void spawnFood(){
-		if(!foodInGame){
-			food = new Food(
-					(int) Math.abs(new Random().nextInt(__B_WIDTH)),
-					(int) Math.abs(new Random().nextInt(__B_HEIGHT)),
-					(int) Math.abs(new Random().nextInt(__WORLD_SIZE))+1
-					);
-			foodInGame = true;
-			System.out.println("Food spawned at X: " + food.X + ", Y: " + food.Y + ", and Tile: " + food.tile);
-		}
+		food = new Food(
+				(int) Math.abs(new Random().nextInt(__B_WIDTH-40)) + 20,
+				(int) Math.abs(new Random().nextInt(__B_HEIGHT-40)) + 20,
+				(int) Math.abs(new Random().nextInt(__WORLD_SIZE))+1
+				);
+		System.out.println("Food spawned at X: " + food.X + ", Y: " + food.Y + ", and Tile: " + food.tile);
 	}
 	
 	//Checks if the player is in contact with a food entity
 	private boolean playerFoodCollisionCheck(){
 		
 		if(user.hitBox.intersects(food.hitBox) && user.tile == food.tile){
-			user.health += food.healthRecovered;
-			foodInGame = false;
-			spawnFood();
+			score += food.healthRecovered;						//Base score
+			if(user.healBy(food.healthRecovered))score += 100;	//Heal the player and extra score
+			playSound("MunchingSound.wav");						//Eating SFX
+			spawnFood();										//Reset food
 		}
 		return false;
 	}
@@ -264,6 +269,12 @@ public class HealthGameBoard extends JPanel implements Board{
 		musicClip.close();		//This is to prevent overlapping music
 	}
 	
+	private void drawScore(Graphics g){
+		g.setColor(Color.WHITE);
+		g.setFont(smlFont);
+		g.drawString("Score: " + score, 5, 5+24);
+	}
+	
 	
 	/**
 	Game Engine Functions
@@ -285,6 +296,7 @@ public class HealthGameBoard extends JPanel implements Board{
 		if(inGame){
 			drawBackground(g);
 			drawEntities(g);
+			drawScore(g);
 		} else gameOver(g);
 	}
 	
@@ -346,7 +358,7 @@ public class HealthGameBoard extends JPanel implements Board{
 			if(key == KeyEvent.VK_LEFT) leftDir = true;
 			
 			//Testing
-			if(key == KeyEvent.VK_S) user.speed = 5;//Sprinting Mechanic?
+			if(key == KeyEvent.VK_S) user.speed = 4;//Sprinting Mechanic?
 			//if(key == KeyEvent.VK_H) user.health = user.maxHealth/2;
 		}
 		

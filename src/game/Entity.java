@@ -45,4 +45,8 @@ public class Entity {
 		g.drawRect(X-size/2,Y-size/2,size,size);
 		g.drawRect(X+1-size/2, Y+1-size/2, size-2, size-2);
 	}
+
+	public void setRect(){
+		this.hitBox.setBounds(X, Y, size, size);
+	}
 }

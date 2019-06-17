@@ -68,4 +68,15 @@ public class Player extends Entity{
 				5);
 				
 	}
+
+	//Heals the player by the int. If health > maxHealth then reduce health till at maxhealth
+	public boolean healBy(int healthRecovered){
+		this.health += healthRecovered;
+		if(this.health > this.maxHealth) {
+			this.health = this.maxHealth;
+			System.out.println("Player healed up to " + this.health + " health");
+			return true;
+		}
+		return false;
+	}
 }
